@@ -10,15 +10,18 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * Created by acesmndr on 8/22/15.
  */
 public class WorldController extends InputAdapter{
+    private Rectangle r1 = new Rectangle();
+    private Rectangle r2 = new Rectangle();
     private boolean accelerometerAvailable;
     public CameraHelper cameraHelper;
     private static final String TAG=WorldController.class.getName();
-    public Sprite[] testSprites;
+    public Sprite[] testSprites,rockSprites;
     public int selectedSprite;
     public WorldController(){
         Gdx.input.setInputProcessor(this);
@@ -32,18 +35,30 @@ public class WorldController extends InputAdapter{
 
     private void initTestObjects() {
         testSprites=new Sprite[5];
-        int height=32;
-        int width=32;
+        rockSprites=new Sprite[5];
+        int height=24;
+        int width=24;
+        Texture img=new Texture(Gdx.files.internal("batplayer.png"));
         Pixmap pixmap=createProceduralPixmap(width,height);
         Texture texture=new Texture(pixmap);
         for(int i=0;i<testSprites.length;i++){
-            Sprite spr=new Sprite(texture);
+            Sprite spr=new Sprite(img);
             spr.setSize(1, 1);
-            spr.setOrigin(spr.getWidth()/2.0f,spr.getHeight()/2.0f);
+            spr.setOrigin(spr.getWidth() / 2.0f, spr.getHeight() / 2.0f);
             float randomX= MathUtils.random(-2.0f,2.0f);
             float randomY=MathUtils.random(-2.0f,2.0f);
             spr.setPosition(randomX,randomY);
             testSprites[i]=spr;
+
+        }
+        for(int i=0;i<testSprites.length;i++){
+            Sprite spr1=new Sprite(texture);
+            spr1.setSize(0.25f, 0.25f);
+            spr1.setOrigin(spr1.getWidth()/2.0f,spr1.getHeight()/2.0f);
+            float randomX= MathUtils.random(-2.0f,2.0f);
+            float randomY=MathUtils.random(-2.0f,2.0f);
+            spr1.setPosition(randomX+0.04f,randomY+0.04f);
+            rockSprites[i]=spr1;
         }
         selectedSprite=0;
     }
@@ -61,6 +76,7 @@ public class WorldController extends InputAdapter{
     public void update(float deltaTime){
         handleDebugInput(deltaTime);
         updateTestObjects(deltaTime);
+        testCollisions();
         cameraHelper.update(deltaTime);
     }
     @Override
@@ -75,6 +91,7 @@ public class WorldController extends InputAdapter{
             selectedSprite = (selectedSprite + 1) % testSprites.length;
             if (cameraHelper.hasTarget()) {
                 cameraHelper.setTarget(testSprites[selectedSprite]);
+                r1.set(testSprites[selectedSprite].getX(),testSprites[selectedSprite].getY(),32,32);
             }
             Gdx.app.debug(TAG, "Sprite #" + selectedSprite + " selected");
         }
@@ -102,7 +119,7 @@ public class WorldController extends InputAdapter{
             } else {
                 amountY /= Constants.ACCEL_MAX_ANGLE_MAX_MOVEMENT;
             }
-            moveSelectedSprite(amountX*0.02f, -amountY*0.01f);
+            moveSelectedSprite(amountX * 0.02f, -amountY * 0.01f);
         if(Gdx.input.isTouched()){
                 selectedSprite = (selectedSprite + 1) % testSprites.length;
                 if (cameraHelper.hasTarget()) {
@@ -146,6 +163,26 @@ public class WorldController extends InputAdapter{
                 -camZoomSpeed);
         if (Gdx.input.isKeyPressed(Input.Keys.SLASH)) cameraHelper.setZoom(1);*/
     }
+    private void testCollisions () {
+        r1.set(testSprites[selectedSprite].getX(), testSprites[selectedSprite].getY(), 32, 32);
+// Test collision: Bunny Head <-> Rocks
+        for (Sprite rsprite : rockSprites) {
+            r2.set(rsprite.getBoundingRectangle());
+            if (!r1.overlaps(r2)) continue;
+            onCollision();
+// IMPORTANT: must do all collisions for valid
+// edge testing on rocks.
+        }
+    }
+
+    private void onCollision() {
+        selectedSprite = (selectedSprite + 1) % testSprites.length;
+        if (cameraHelper.hasTarget()) {
+            cameraHelper.setTarget(testSprites[selectedSprite]);
+        }
+        Gdx.app.debug(TAG, "Sprite #" + selectedSprite + " selected");
+    }
+
     private void moveCamera (float x, float y) {
         x += cameraHelper.getPosition().x;
         y += cameraHelper.getPosition().y;
