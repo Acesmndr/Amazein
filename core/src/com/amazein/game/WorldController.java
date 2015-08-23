@@ -1,6 +1,7 @@
 package com.amazein.game;
 
 import com.amazein.game.util.CameraHelper;
+import com.amazein.game.util.Constants;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.math.MathUtils;
  * Created by acesmndr on 8/22/15.
  */
 public class WorldController extends InputAdapter{
+    private boolean accelerometerAvailable;
     public CameraHelper cameraHelper;
     private static final String TAG=WorldController.class.getName();
     public Sprite[] testSprites;
@@ -23,6 +25,7 @@ public class WorldController extends InputAdapter{
         init();
     }
     public void init(){
+        accelerometerAvailable=Gdx.input.isPeripheralAvailable(Input.Peripheral.Accelerometer);
         cameraHelper=new CameraHelper();
         initTestObjects();
     }
@@ -84,7 +87,32 @@ public class WorldController extends InputAdapter{
         return false;
     }
     private void handleDebugInput(float deltaTime) {
-        if(Gdx.app.getType()!= Application.ApplicationType.Desktop)
+        if (accelerometerAvailable) {
+            float amountX = Gdx.input.getAccelerometerY() / 10.0f;
+            float amountY = Gdx.input.getAccelerometerX() / 10.0f;
+            amountX *= 90.0f;
+            amountY *= 90.0f;
+        if (Math.abs(amountX) < Constants.ACCEL_ANGLE_DEAD_ZONE) {
+                amountX = 0;
+            } else {
+                    amountX /= Constants.ACCEL_MAX_ANGLE_MAX_MOVEMENT;
+            }
+            if (Math.abs(amountY) < Constants.ACCEL_ANGLE_DEAD_ZONE) {
+                amountY = 0;
+            } else {
+                amountY /= Constants.ACCEL_MAX_ANGLE_MAX_MOVEMENT;
+            }
+            moveSelectedSprite(amountX*0.02f, -amountY*0.01f);
+        if(Gdx.input.isTouched()){
+                selectedSprite = (selectedSprite + 1) % testSprites.length;
+                if (cameraHelper.hasTarget()) {
+                    cameraHelper.setTarget(testSprites[selectedSprite]);
+                }
+                Gdx.app.debug(TAG, "Sprite #" + selectedSprite + " selected");
+            }
+
+        }
+        /*if(Gdx.app.getType()!= Application.ApplicationType.Desktop)
             return;
         float sprMoveSpeed = 5 * deltaTime;
         if (Gdx.input.isKeyPressed(Input.Keys.A)) moveSelectedSprite(
@@ -116,7 +144,7 @@ public class WorldController extends InputAdapter{
             cameraHelper.addZoom(camZoomSpeed);
         if (Gdx.input.isKeyPressed(Input.Keys.PERIOD)) cameraHelper.addZoom(
                 -camZoomSpeed);
-        if (Gdx.input.isKeyPressed(Input.Keys.SLASH)) cameraHelper.setZoom(1);
+        if (Gdx.input.isKeyPressed(Input.Keys.SLASH)) cameraHelper.setZoom(1);*/
     }
     private void moveCamera (float x, float y) {
         x += cameraHelper.getPosition().x;
