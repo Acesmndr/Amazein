@@ -12,4 +12,5 @@ public class Constants {
     public static final float ACCEL_ANGLE_DEAD_ZONE = 5.0f;
     // Max angle of rotation needed to gain max movement velocity
     public static final float ACCEL_MAX_ANGLE_MAX_MOVEMENT = 20.0f;
+    public static final String TEXTURE_ATLAS_OBJECTS = "images/amazein.pack";
 }

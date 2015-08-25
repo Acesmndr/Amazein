@@ -9,8 +9,10 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by acesmndr on 8/22/15.
@@ -34,11 +36,31 @@ public class WorldController extends InputAdapter{
     }
 
     private void initTestObjects() {
-        testSprites=new Sprite[5];
+        testSprites = new Sprite[5];
+// Create a list of texture regions
+        Array<TextureRegion> regions = new Array<TextureRegion>();
+        regions.add(Assets.instance.acesBat.bat);
+        regions.add(Assets.instance.blockadeHouse.house);
+        for (int i = 0; i < testSprites.length; i++) {
+            Sprite spr = new Sprite(regions.random());
+            spr.setSize(0.5f, 0.5f);
+// Set origin to sprite's center
+            spr.setOrigin(spr.getWidth() / 2.0f,
+                    spr.getHeight() / 2.0f);
+// Calculate random position for sprite
+            float randomX = MathUtils.random(-2.0f, 2.0f);
+            float randomY = MathUtils.random(-2.0f, 2.0f);
+            spr.setPosition(randomX, randomY);
+// Put new sprite into array
+            testSprites[i] = spr;
+        }
+// Set first sprite as selected one
+        selectedSprite = 0;
+        /*testSprites=new Sprite[5];
         rockSprites=new Sprite[5];
         int height=24;
         int width=24;
-        Texture img=new Texture(Gdx.files.internal("batplayer.png"));
+        Texture img=new Texture(Assets.instance.acesBat);
         Pixmap pixmap=createProceduralPixmap(width,height);
         Texture texture=new Texture(pixmap);
         for(int i=0;i<testSprites.length;i++){
@@ -60,7 +82,7 @@ public class WorldController extends InputAdapter{
             spr1.setPosition(randomX+0.04f,randomY+0.04f);
             rockSprites[i]=spr1;
         }
-        selectedSprite=0;
+        selectedSprite=0;*/
     }
     private Pixmap createProceduralPixmap(int width,int height){
         Pixmap pixmap=new Pixmap(width,height, Pixmap.Format.RGBA8888);
@@ -76,7 +98,7 @@ public class WorldController extends InputAdapter{
     public void update(float deltaTime){
         handleDebugInput(deltaTime);
         updateTestObjects(deltaTime);
-        testCollisions();
+        //testCollisions();
         cameraHelper.update(deltaTime);
     }
     @Override
@@ -167,7 +189,7 @@ public class WorldController extends InputAdapter{
         r1.set(testSprites[selectedSprite].getX(), testSprites[selectedSprite].getY(), 32, 32);
 // Test collision: Bunny Head <-> Rocks
         for (Sprite rsprite : rockSprites) {
-            r2.set(rsprite.getBoundingRectangle());
+            r2.set(rsprite.getX(),rsprite.getY(),rsprite.getWidth()/rsprite.getScaleX(),rsprite.getHeight()/rsprite.getScaleY());
             if (!r1.overlaps(r2)) continue;
             onCollision();
 // IMPORTANT: must do all collisions for valid

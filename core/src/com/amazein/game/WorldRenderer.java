@@ -38,8 +38,6 @@ public class WorldRenderer implements Disposable {
     private void renderGui (SpriteBatch batch) {
         batch.setProjectionMatrix(cameraGUI.combined);
         batch.begin();
-        renderGuiFpsCounter(batch);
-// draw FPS text (anchored to bottom right edge)
         batch.end();
     }
     private void renderTestObjects() {
@@ -49,9 +47,9 @@ public class WorldRenderer implements Disposable {
         for(Sprite sprite:worldController.testSprites){
             sprite.draw(batch);
         }
-        for (Sprite sprite:worldController.rockSprites){
+        /*for (Sprite sprite:worldController.rockSprites){
             sprite.draw(batch);
-        }
+        }*/
         batch.end();
     }
 
@@ -64,24 +62,6 @@ public class WorldRenderer implements Disposable {
         cameraGUI.position.set(cameraGUI.viewportWidth / 2,
                 cameraGUI.viewportHeight / 2, 0);
         cameraGUI.update();
-    }
-    private void renderGuiFpsCounter (SpriteBatch batch) {
-        float x = cameraGUI.viewportWidth - 55;
-        float y = cameraGUI.viewportHeight - 15;
-        int fps = Gdx.graphics.getFramesPerSecond();
-        BitmapFont fpsFont = new BitmapFont();
-        if (fps >= 45) {
-// 45 or more FPS show up in green
-            fpsFont.setColor(0, 1, 0, 1);
-        } else if (fps >= 30) {
-// 30 or more FPS show up in yellow
-            fpsFont.setColor(1, 1, 0, 1);
-        } else {
-// less than 30 FPS show up in red
-            fpsFont.setColor(1, 0, 0, 1);
-        }
-        fpsFont.draw(batch, "FPS: " + fps, 100, 100);
-        fpsFont.setColor(1, 1, 1, 1); // white
     }
 
     @Override
